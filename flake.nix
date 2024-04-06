@@ -203,6 +203,7 @@
         devShells.default = pkgs.mkShell {
           nativeBuildInputs = (with pkgs; [
             toolchain # cargo and such from crane
+            just # command recipes
             dive # docker images
             cargo-leptos # main leptos build tool
             flyctl # fly.io
