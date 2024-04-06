@@ -1,0 +1,68 @@
+
+[workspace]
+resolver = "2"
+members = ["crates/*"]
+
+# only for client-side wasm builds
+[profile.wasm-release]
+inherits = "release"
+opt-level = 'z'
+lto = true
+codegen-units = 1
+
+[workspace.dependencies]
+leptos = { version = "0.6", features = ["nightly", "experimental-islands"] }
+leptos_axum = { version = "0.6", features = ["experimental-islands"] }
+leptos_meta = { version = "0.6", features = ["nightly"] }
+leptos_router = { version = "0.6", features = ["nightly"] }
+
+axum = { version = "0.7.4", features = ["macros", "tracing"] }
+color-eyre = "0.6"
+console_error_panic_hook = "0.1.7"
+console_log = "1"
+log = "0.4"
+simple_logger = "4.2.0"
+tokio = { version = "1", features = ["full"] }
+tower = { version = "0.4", features = ["full"] }
+tower-http = { version = "0.5", features = ["full"] }
+wasm-bindgen = "=0.2.92"
+
+[patch.crates-io]
+leptos = { git = 'https://github.com/leptos-rs/leptos.git', rev = "c06f6be" }
+leptos_axum = { git = 'https://github.com/leptos-rs/leptos.git', rev = "c06f6be" }
+leptos_meta = { git = 'https://github.com/leptos-rs/leptos.git', rev = "c06f6be" }
+leptos_router = { git = 'https://github.com/leptos-rs/leptos.git', rev = "c06f6be" }
+
+[[workspace.metadata.leptos]]
+# this name is used for the wasm, js and css file names
+name = "site"
+
+# cache busting for keeping bundles up to date
+hash-files = true
+
+bin-package = "site-server"
+lib-package = "site-frontend"
+
+site-root = "target/site"
+site-pkg-dir = "pkg"
+
+style-file = "crates/site-app/style/main.scss"
+assets-dir = "crates/site-app/public"
+
+site-addr = "127.0.0.1:3000"
+reload-port = 3001
+
+browserquery = "defaults"
+
+tailwind-input-file = "crates/site-app/style/main.scss"
+tailwind-config-file = "crates/site-app/style/tailwind/tailwind.config.js"
+
+# set by cargo-leptos
+watch = false
+env = "DEV"
+
+bin-features = []
+bin-default-features = false
+lib-features = []
+lib-default-features = false
+lib-profile-release = "wasm-release"

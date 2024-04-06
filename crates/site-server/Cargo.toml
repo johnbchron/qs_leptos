@@ -1,0 +1,28 @@
+[package]
+name = "site-server"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+site-app = { path = "../site-app", default-features = false, features = ["ssr"] }
+
+leptos = { workspace = true, features = [ "ssr", "tracing" ]}
+leptos_axum.workspace = true
+leptos_router.workspace = true
+
+axum.workspace = true
+color-eyre.workspace = true
+simple_logger.workspace = true
+tokio.workspace = true
+tower.workspace = true
+tower-http.workspace = true
+log.workspace = true
+
+tracing-chrome = { version = "0.7", optional = true }
+tracing-subscriber = { version = "0.3", features = [ "env-filter" ] }
+
+[features]
+default = []
+chrome-tracing = [ "tracing-chrome" ]
