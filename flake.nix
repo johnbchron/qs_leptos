@@ -209,9 +209,6 @@
             flyctl # fly.io
             bacon # cargo check w/ hot reload
             cargo-deny # license checking
-
-            # surreal stuff
-            surrealdb surrealdb-migrations
           ])
             ++ common_args.buildInputs
             ++ common_args.nativeBuildInputs
