@@ -13,7 +13,11 @@ To start developing, simply run `just` if you have [`just`](https://github.com/c
 
 If you'd like to test the release version of the app, run `just serve` (`cargo leptos serve --release`).
 
+## Deployment
+
 If you'd like to build and run the container version of the app, run `just container`. This will build the container entirely in Nix, load it into the docker daemon, and run it ephemerally (`--rm`) with port 3000 open. To learn more about building containers in Nix, read [here](https://thewagner.net/blog/2021/02/25/building-container-images-with-nix/) (tl;dr: it's awesome).
+
+To just build and load the docker image, run `nix build "./#container" && docker load -i result`. The image will be loaded with the label `site-server`. You can then do any normal container action with this image.
 
 # Repo Layout
 - `crates/`: contains all the Rust crates
@@ -47,4 +51,3 @@ If you'd like to build and run the container version of the app, run `just conta
 - `flake.lock`: nix flake lock file
 - `flake.nix`: nix flake file
 - `justfile`: just recipe file
-- `rustfmt.toml`: rust formatting file
