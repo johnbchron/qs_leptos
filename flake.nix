@@ -49,7 +49,7 @@
           source-root = ./.;
         };
 
-        common_args = {
+        common-args = {
           inherit src;
 
           pname = "site-server";
@@ -87,7 +87,7 @@
 
         # Build *just* the cargo dependencies, so we can reuse
         # all of that work (e.g. via cachix) when running in CI
-        site-server-deps = craneLib.buildDepsOnly (common_args // {
+        site-server-deps = craneLib.buildDepsOnly (common-args // {
           # if work is duplicated by the `server-site` package, update these
           # commands from the logs of `cargo leptos build --release -vvv`
           buildPhaseCargoCommand = ''
@@ -100,7 +100,7 @@
 
         # Build the actual crate itself, reusing the dependency
         # artifacts from above.
-        site-server = craneLib.buildPackage (common_args // {
+        site-server = craneLib.buildPackage (common-args // {
           # link the style packages node_modules into the build directory
           preBuild = ''
             ln -s ${style-js-deps}/node_modules \
@@ -148,32 +148,32 @@
       in {
         checks = {
           # lint packages
-          app-hydrate-clippy = craneLib.cargoClippy (common_args // {
+          app-hydrate-clippy = craneLib.cargoClippy (common-args // {
             cargoArtifacts = site-server-deps;
             cargoClippyExtraArgs = "-p site-app --features hydrate -- --deny warnings";
           });
-          app-ssr-clippy = craneLib.cargoClippy (common_args // {
+          app-ssr-clippy = craneLib.cargoClippy (common-args // {
             cargoArtifacts = site-server-deps;
             cargoClippyExtraArgs = "-p site-app --features ssr -- --deny warnings";
           });
-          site-server-clippy = craneLib.cargoClippy (common_args // {
+          site-server-clippy = craneLib.cargoClippy (common-args // {
             cargoArtifacts = site-server-deps;
             cargoClippyExtraArgs = "-p site-server -- --deny warnings";
           });
-          site-frontend-clippy = craneLib.cargoClippy (common_args // {
+          site-frontend-clippy = craneLib.cargoClippy (common-args // {
             cargoArtifacts = site-server-deps;
             cargoClippyExtraArgs = "-p site-frontend -- --deny warnings";
           });
 
           # make sure the docs build
-          site-server-doc = craneLib.cargoDoc (common_args // {
+          site-server-doc = craneLib.cargoDoc (common-args // {
             cargoArtifacts = site-server-deps;
           });
 
           # check formatting
           site-server-fmt = craneLib.cargoFmt {
-            pname = common_args.pname;
-            version = common_args.version;
+            pname = common-args.pname;
+            version = common-args.version;
             
             inherit src;
           };
@@ -186,7 +186,7 @@
           # };
 
           # run tests
-          site-server-nextest = craneLib.cargoNextest (common_args // {
+          site-server-nextest = craneLib.cargoNextest (common-args // {
             cargoArtifacts = site-server-deps;
             partitions = 1;
             partitionType = "count";
@@ -209,8 +209,8 @@
             bacon # cargo check w/ hot reload
             cargo-deny # license checking
           ])
-            ++ common_args.buildInputs
-            ++ common_args.nativeBuildInputs
+            ++ common-args.buildInputs
+            ++ common-args.nativeBuildInputs
             ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
               pkgs.darwin.Security
             ];
