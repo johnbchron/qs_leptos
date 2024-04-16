@@ -32,10 +32,9 @@
         src = nix-filter {
           root = ./.;
           include = [
-            ./Cargo.toml
+            (nix-filter.lib.matchExt "toml")
             ./Cargo.lock
             ./crates
-            (nix-filter.lib.matchExt "toml")
           ];
         };
 
