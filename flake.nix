@@ -19,15 +19,7 @@
         overlays = [ (import rust-overlay) ];
         pkgs = (import nixpkgs) {
           inherit system overlays;
-          config.allowUnfree = true;
         };
-        
-        toolchain = pkgs.rust-bin.selectLatestNightlyWith (toolchain: toolchain.default.override {
-          extensions = [ "rust-src" "rust-analyzer" ];
-          targets = [ "wasm32-unknown-unknown" ];
-        });
-        
-        craneLib = (crane.mkLib pkgs).overrideToolchain toolchain;
 
         src = nix-filter {
           root = ./.;
@@ -37,6 +29,13 @@
             ./crates
           ];
         };
+        
+        toolchain = pkgs.rust-bin.selectLatestNightlyWith (toolchain: toolchain.default.override {
+          extensions = [ "rust-src" "rust-analyzer" ];
+          targets = [ "wasm32-unknown-unknown" ];
+        });
+        
+        craneLib = (crane.mkLib pkgs).overrideToolchain toolchain;
 
         cargo-leptos = (import ./nix/cargo-leptos.nix) {
           inherit pkgs craneLib;
