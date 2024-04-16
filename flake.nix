@@ -34,6 +34,8 @@
           extensions = [ "rust-src" "rust-analyzer" ];
           targets = [ "wasm32-unknown-unknown" ];
         });
+
+        leptos-options = builtins.elemAt (builtins.fromTOML (builtins.readFile ./Cargo.toml)).workspace.metadata.leptos 0;
         
         craneLib = (crane.mkLib pkgs).overrideToolchain toolchain;
 
@@ -51,7 +53,7 @@
         common-args = {
           inherit src;
 
-          pname = "site-server";
+          pname = leptos-options.bin-package;
           version = "0.1.0";
 
           doCheck = false;
@@ -91,9 +93,9 @@
           # commands from the logs of `cargo leptos build --release -vvv`
           buildPhaseCargoCommand = ''
             # build the frontend dependencies
-            cargo build --package=site-frontend --lib --target-dir=/build/source/target/front --target=wasm32-unknown-unknown --no-default-features --profile=wasm-release
+            cargo build --package=${leptos-options.lib-package} --lib --target-dir=/build/source/target/front --target=wasm32-unknown-unknown --no-default-features --profile=${leptos-options.lib-profile-release}
             # build the server dependencies
-            cargo build --package=site-server --no-default-features --release
+            cargo build --package=${leptos-options.bin-package} --no-default-features --release
           '';
         });
 
@@ -122,7 +124,7 @@
         });
 
         site-server-container = pkgs.dockerTools.buildLayeredImage {
-          name = "site-server";
+          name = leptos-options.bin-package;
           tag = "latest";
           contents = [ site-server pkgs.cacert ];
           config = {
@@ -133,13 +135,13 @@
             # we provide the env variables that we get from Cargo.toml during development
             # these can be overridden when the container is run, but defaults are needed
             Env = [
-              "LEPTOS_OUTPUT_NAME=site"
-              "LEPTOS_SITE_ROOT=site"
-              "LEPTOS_SITE_PKG_DIR=pkg"
+              "LEPTOS_OUTPUT_NAME=${leptos-options.name}"
+              "LEPTOS_SITE_ROOT=${leptos-options.name}"
+              "LEPTOS_SITE_PKG_DIR=${leptos-options.site-pkg-dir}"
               "LEPTOS_SITE_ADDR=0.0.0.0:3000"
-              "LEPTOS_RELOAD_PORT=3001"
+              "LEPTOS_RELOAD_PORT=${builtins.toString leptos-options.reload-port}"
               "LEPTOS_ENV=PROD"
-              "LEPTOS_HASH_FILES=true"
+              "LEPTOS_HASH_FILES=${builtins.toJSON leptos-options.hash-files}"
             ];
           };
         };
