@@ -15,9 +15,13 @@ If you'd like to test the release version of the app, run `just serve` (`cargo l
 
 ## Deployment
 
-If you'd like to build and run the container version of the app, run `just container`. This will build the container entirely in Nix, load it into the docker daemon, and run it ephemerally (`--rm`) with port 3000 open. To learn more about building containers in Nix, read [here](https://thewagner.net/blog/2021/02/25/building-container-images-with-nix/) (tl;dr: it's awesome).
+If you'd like to build and run the container version of the app, run `just container`. This will build the container entirely in Nix, load it into the docker daemon, and run it ephemerally (`--rm`) with port 3000 open. The image has correct defaults for all the environment variables that `cargo-leptos` normally provides, but they're also overridable when you run the container.
+
+To learn more about building containers in Nix, read [here](https://thewagner.net/blog/2021/02/25/building-container-images-with-nix/) (tl;dr: it's awesome).
 
 To just build and load the docker image, run `nix build "./#container" && docker load -i result`. The image will be loaded with the label `site-server`. You can then do any normal container action with this image.
+
+You can also build the release build with `nix build` (which builds the default package, `site-server`), but if you run it with `./result/bin/site-server`, the binary won't inherit the environment variables that `cargo-leptos` normally provides, which is why I recommend you just use the container.
 
 # Repo Layout
 - `crates/`: contains all the Rust crates
