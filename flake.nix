@@ -2,7 +2,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     rust-overlay = {
-      url = "https://flakehub.com/f/oxalica/rust-overlay/0.1.1330.tar.gz";
+      url = "https://flakehub.com/f/oxalica/rust-overlay/0.1.tar.gz";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     crane = {

@@ -16,22 +16,16 @@ leptos_axum = { version = "0.6", features = ["experimental-islands"] }
 leptos_meta = { version = "0.6", features = ["nightly"] }
 leptos_router = { version = "0.6", features = ["nightly"] }
 
-axum = { version = "0.7.4", features = ["macros", "tracing"] }
+axum = { version = "0.7", features = ["macros", "tracing"] }
 color-eyre = "0.6"
 console_error_panic_hook = "0.1.7"
 console_log = "1"
 log = "0.4"
 simple_logger = "4.2.0"
 tokio = { version = "1", features = ["full"] }
-tower = { version = "0.4", features = ["full"] }
+tower = { version = "0.5", features = ["full"] }
 tower-http = { version = "0.5", features = ["full"] }
-wasm-bindgen = "=0.2.92"
-
-[patch.crates-io]
-leptos = { git = 'https://github.com/leptos-rs/leptos.git', rev = "c06f6be" }
-leptos_axum = { git = 'https://github.com/leptos-rs/leptos.git', rev = "c06f6be" }
-leptos_meta = { git = 'https://github.com/leptos-rs/leptos.git', rev = "c06f6be" }
-leptos_router = { git = 'https://github.com/leptos-rs/leptos.git', rev = "c06f6be" }
+wasm-bindgen = "=0.2.93"
 
 [[workspace.metadata.leptos]]
 # this name is used for the wasm, js and css file names
