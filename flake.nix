@@ -118,7 +118,7 @@
           '';
           
           buildPhaseCargoCommand = ''
-            cargo leptos build --release -vvv
+            LEPTOS_HASH_FILES=true cargo leptos build --release -vvv
           '';
 
           installPhaseCommand = ''
