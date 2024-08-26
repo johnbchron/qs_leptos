@@ -38,7 +38,7 @@ leptos_router = { git = 'https://github.com/leptos-rs/leptos.git', rev = "c06f6b
 name = "site"
 
 # cache busting for keeping bundles up to date
-hash-files = true
+hash-files = false
 
 bin-package = "site-server"
 lib-package = "site-frontend"
