@@ -34,7 +34,12 @@
         };
         
         # set up the rust toolchain, including the wasm target
-        toolchain = pkgs.rust-bin.selectLatestNightlyWith (toolchain: toolchain.default.override {
+        # these are separated because rust-analyzer is useless in CI, so the
+        # dev toolchain is only used in the dev shell
+        toolchain = pkgs.rust-bin.selectLatestNightlyWith (toolchain: toolchain.minimal.override {
+          targets = [ "wasm32-unknown-unknown" ];
+        });
+        dev-toolchain = pkgs.rust-bin.selectLatestNightlyWith (toolchain: toolchain.default.override {
           extensions = [ "rust-src" "rust-analyzer" ];
           targets = [ "wasm32-unknown-unknown" ];
         });
@@ -207,9 +212,9 @@
         
         devShells.default = pkgs.mkShell {
           nativeBuildInputs = (with pkgs; [
-            toolchain # cargo and such from crane
+            dev-toolchain # rust toolchain
             just # command recipes
-            dive # docker images
+            dive # for inspecting docker images
             cargo-leptos # main leptos build tool
             flyctl # fly.io
             bacon # cargo check w/ hot reload
