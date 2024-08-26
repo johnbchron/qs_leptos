@@ -232,7 +232,6 @@
             just # command recipes
             dive # for inspecting docker images
             cargo-leptos # main leptos build tool
-            flyctl # fly.io
             bacon # cargo check w/ hot reload
             cargo-deny # license checking
 
