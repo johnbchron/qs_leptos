@@ -68,12 +68,7 @@
           doCheck = false;
 
           nativeBuildInputs = [
-            pkgs.cargo-leptos
             pkgs.binaryen # provides wasm-opt
-
-            # used by cargo-leptos for styling
-            pkgs.dart-sass
-            pkgs.tailwindcss
           ] ++ pkgs.lib.optionals (system == "x86_64-linux") [
             pkgs.nasm # wasm compiler only for x86_64-linux
           ] ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
@@ -88,28 +83,55 @@
 
         };
 
-        # Build *just* the cargo dependencies, so we can reuse
-        # all of that work (e.g. via cachix) when running in CI
-        site-server-deps = craneLib.buildDepsOnly (common-args // {
-          # if work is duplicated by the `server-site` package, update these
-          # commands from the logs of `cargo leptos build --release -vvv`
+        # build the deps for the frontend bundle, and export the target folder
+        site-frontend-deps = craneLib.mkCargoDerivation (common-args // {
+          pname = "site-frontend-deps";
+          src = craneLib.mkDummySrc common-args;
+          cargoArtifacts = null;
+          doInstallCargoArtifacts = true;
+
           buildPhaseCargoCommand = ''
-            # build the frontend dependencies
-            cargo build --package=${leptos-options.lib-package} --lib --target-dir=/build/source/target/front --target=wasm32-unknown-unknown --no-default-features --profile=${leptos-options.lib-profile-release}
-            # build the server dependencies
-            cargo build --package=${leptos-options.bin-package} --no-default-features --release
+            cargo build \
+              --package=${leptos-options.lib-package} \
+              --lib \
+              --target-dir=/build/source/target/front \
+              --target=wasm32-unknown-unknown \
+              --no-default-features \
+              --profile=${leptos-options.lib-profile-release}
+          '';
+        });
+        # build the deps for the server binary, and export the target folder
+        site-server-deps = craneLib.mkCargoDerivation (common-args // {
+          pname = "site-server-deps";
+          src = craneLib.mkDummySrc common-args;
+          cargoArtifacts = site-frontend-deps;
+          doInstallCargoArtifacts = true;
+
+          buildPhaseCargoCommand = ''
+            cargo build \
+              --package=${leptos-options.bin-package} \
+              --no-default-features \
+              --release
           '';
         });
 
-        # Build the actual crate itself, reusing the dependency
-        # artifacts from above.
+        # build the binary and bundle using cargo leptos
         site-server = craneLib.buildPackage (common-args // {
+          # add inputs needed for leptos build
+          nativeBuildInputs = common-args.nativeBuildInputs ++ [
+            pkgs.cargo-leptos
+            # used by cargo-leptos for styling
+            pkgs.dart-sass
+            pkgs.tailwindcss
+         ];
+
           # link the style packages node_modules into the build directory
           preBuild = ''
             ln -s ${style-js-deps}/node_modules \
               ./crates/site-app/style/tailwind/node_modules
           '';
           
+          # enable hash_files again
           buildPhaseCargoCommand = ''
             LEPTOS_HASH_FILES=true cargo leptos build --release -vvv
           '';
@@ -213,6 +235,11 @@
             flyctl # fly.io
             bacon # cargo check w/ hot reload
             cargo-deny # license checking
+
+            cargo-leptos # main leptos build tool
+            # used by cargo-leptos for styling
+            dart-sass
+            tailwindcss
           ])
             ++ common-args.buildInputs
             ++ common-args.nativeBuildInputs
