@@ -139,6 +139,7 @@
           config = {
             # runs the executable with tini: https://github.com/krallin/tini
             # this does signal forwarding and zombie process reaping
+            # this should be removed if using something like firecracker (i.e. on fly.io)
             Entrypoint = [ "${pkgs.tini}/bin/tini" "site-server" "--" ];
             WorkingDir = "${site-server}/bin";
             # we provide the env variables that we get from Cargo.toml during development
