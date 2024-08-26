@@ -11,10 +11,10 @@ lto = true
 codegen-units = 1
 
 [workspace.dependencies]
-leptos = { version = "0.6", features = ["nightly", "experimental-islands"] }
-leptos_axum = { version = "0.6", features = ["experimental-islands"] }
-leptos_meta = { version = "0.6", features = ["nightly"] }
-leptos_router = { version = "0.6", features = ["nightly"] }
+leptos = { version = "0.7.0-beta2", features = ["nightly", "experimental-islands"] }
+leptos_axum = { version = "0.7.0-beta2", features = [] }
+leptos_meta = { version = "0.7.0-beta2", features = [] }
+leptos_router = { version = "0.7.0-beta2", features = ["nightly"] }
 
 axum = { version = "0.7", features = ["macros", "tracing"] }
 color-eyre = "0.6"

@@ -140,13 +140,14 @@
           
           # enable hash_files again
           buildPhaseCargoCommand = ''
-            LEPTOS_HASH_FILES=true cargo leptos build --release -vvv
+            # LEPTOS_HASH_FILES=true cargo leptos build --release -vvv
+            cargo leptos build --release -vvv
           '';
 
           installPhaseCommand = ''
             mkdir -p $out/bin
             cp target/release/site-server $out/bin/
-            cp target/release/hash.txt $out/bin/
+            # cp target/release/hash.txt $out/bin/
             cp -r target/site $out/bin/
           '';
 
@@ -173,8 +174,8 @@
               "LEPTOS_SITE_ADDR=0.0.0.0:3000"
               "LEPTOS_RELOAD_PORT=${builtins.toString leptos-options.reload-port}"
               "LEPTOS_ENV=PROD"
-              # https://github.com/leptos-rs/cargo-leptos/issues/271
-              "LEPTOS_HASH_FILES=true"
+              # # https://github.com/leptos-rs/cargo-leptos/issues/271
+              # "LEPTOS_HASH_FILES=true"
             ];
           };
         };
