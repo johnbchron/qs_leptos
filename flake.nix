@@ -16,11 +16,14 @@
   outputs = { self, nixpkgs, rust-overlay, crane, cargo-leptos-src, nix-filter, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
       let
+        # set up `pkgs` with rust-overlay
         overlays = [ (import rust-overlay) ];
         pkgs = (import nixpkgs) {
           inherit system overlays;
         };
 
+        # filter the source to reduce cache misses
+        # add a path here if you need other files, e.g. bc of `include_str!()`
         src = nix-filter {
           root = ./.;
           include = [
@@ -30,58 +33,59 @@
           ];
         };
         
+        # set up the rust toolchain, including the wasm target
         toolchain = pkgs.rust-bin.selectLatestNightlyWith (toolchain: toolchain.default.override {
           extensions = [ "rust-src" "rust-analyzer" ];
           targets = [ "wasm32-unknown-unknown" ];
         });
 
-        leptos-options = builtins.elemAt (builtins.fromTOML (builtins.readFile ./Cargo.toml)).workspace.metadata.leptos 0;
+        # read leptos options from `Cargo.toml`
+        leptos-options = builtins.elemAt (builtins.fromTOML (
+          builtins.readFile ./Cargo.toml
+        )).workspace.metadata.leptos 0;
         
+        # configure crane to use our toolchain
         craneLib = (crane.mkLib pkgs).overrideToolchain toolchain;
 
+        # build cargo-leptos from source
         cargo-leptos = (import ./nix/cargo-leptos.nix) {
           inherit pkgs craneLib;
           cargo-leptos = cargo-leptos-src;
         };
 
+        # download and install JS packages used by tailwind
         style-js-deps = (import ./nix/style-js-deps.nix) {
           inherit pkgs nix-filter;
-
           source-root = ./.;
         };
 
+        # crane build configuration used by multiple builds
         common-args = {
           inherit src;
 
+          # use the name defined in the `Cargo.toml` leptos options
           pname = leptos-options.bin-package;
           version = "0.1.0";
 
           doCheck = false;
 
           nativeBuildInputs = [
-            # Add additional build inputs here
             cargo-leptos
-            pkgs.cargo-generate
-            pkgs.binaryen
-            pkgs.clang
-            pkgs.mold
+            pkgs.binaryen # provides wasm-opt
 
-            # for styling
+            # used by cargo-leptos for styling
             pkgs.dart-sass
             pkgs.tailwindcss
-            pkgs.yarn
-            pkgs.yarn2nix-moretea.fixup_yarn_lock
           ] ++ pkgs.lib.optionals (system == "x86_64-linux") [
-            # extra packages only for x86_64-linux
-            pkgs.nasm
+            pkgs.nasm # wasm compiler only for x86_64-linux
           ] ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
             # Additional darwin specific inputs can be set here
-            pkgs.libiconv
+            pkgs.libiconv # character encoding lib needed by darwin
           ];
 
           buildInputs = [
-            pkgs.pkg-config
-            pkgs.openssl
+            pkgs.pkg-config # used by many crates for finding system packages
+            pkgs.openssl # needed for many http libraries
           ];
 
         };
