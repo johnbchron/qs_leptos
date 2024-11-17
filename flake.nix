@@ -11,12 +11,16 @@
     };
     cargo-leptos-src = { url = "github:leptos-rs/cargo-leptos"; flake = false; };
     nix-filter.url = "github:numtide/nix-filter";
+    devshell.url = "github:numtide/devshell";
   };
 
-  outputs = { nixpkgs, rust-overlay, crane, cargo-leptos-src, nix-filter, flake-utils, ... }:
+  outputs = { nixpkgs, rust-overlay, crane, cargo-leptos-src, nix-filter, flake-utils, devshell, ... }:
     flake-utils.lib.eachDefaultSystem (system: let
       # set up `pkgs` with rust-overlay
-      overlays = [ (import rust-overlay) ];
+      overlays = [
+        (import rust-overlay)
+        devshell.overlays.default
+      ];
       pkgs = (import nixpkgs) {
         inherit system overlays;
       };
@@ -37,6 +41,7 @@
       # dev toolchain is only used in the dev shell
       toolchain = pkgs.rust-bin.selectLatestNightlyWith (toolchain: toolchain.minimal.override {
         targets = [ "wasm32-unknown-unknown" ];
+        extensions = [ "clippy" "rustfmt" ];
       });
       dev-toolchain = pkgs.rust-bin.selectLatestNightlyWith (toolchain: toolchain.default.override {
         extensions = [ "rust-src" "rust-analyzer" ];
@@ -77,9 +82,6 @@
           pkgs.binaryen # provides wasm-opt
         ] ++ pkgs.lib.optionals (system == "x86_64-linux") [
           pkgs.nasm # wasm compiler only for x86_64-linux
-        ] ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
-          # Additional darwin specific inputs can be set here
-          pkgs.libiconv # character encoding lib needed by darwin
         ];
 
         buildInputs = [
@@ -232,8 +234,8 @@
         container = site-server-container;
       };
       
-      devShells.default = pkgs.mkShell {
-        nativeBuildInputs = (with pkgs; [
+      devShells.default = pkgs.devshell.mkShell {
+        packages = (with pkgs; [
           dev-toolchain # rust toolchain
           just # command recipes
           dive # for inspecting docker images
@@ -242,15 +244,15 @@
           cargo-deny # license checking
 
           cargo-leptos # main leptos build tool
+          clang # needed for some rust deps
           # used by cargo-leptos for styling
           dart-sass
           tailwindcss
         ])
           ++ common-args.buildInputs
-          ++ common-args.nativeBuildInputs
-          ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
-            pkgs.darwin.Security
-          ];
+          ++ common-args.nativeBuildInputs;
+
+        motd = "\n  Welcome to the {2}jsonp{reset} dev shell. Run {1}menu{reset} for commands.\n";
       };
     }
   );
