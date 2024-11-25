@@ -54,8 +54,20 @@ fn HomePage() -> impl IntoView {
     let count = RwSignal::new(0);
     let on_click = move |_| *count.write() += 1;
 
+    let resource = Resource::new(|| (), |_| test());
+
     view! {
         <h1>"Welcome to Leptos!"</h1>
         <button on:click=on_click>"Click Me: " {count}</button>
+
+        <Suspense fallback=|| "Loading...".into_view()>
+            { move || resource.get().map(|_| "Loaded!".into_view()) }
+        </Suspense>
     }
+}
+
+#[server]
+pub async fn test() -> Result<(), ServerFnError> {
+    tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+    Ok(())
 }

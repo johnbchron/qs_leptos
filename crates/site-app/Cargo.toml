@@ -11,10 +11,12 @@ leptos_meta.workspace = true
 leptos_router.workspace = true
 leptos_axum = { workspace = true, optional = true }
 
+tokio = { workspace = true, optional = true, features = ["full"] }
+
 [features]
 default = []
 hydrate = ["leptos/hydrate"]
 ssr = [
   "leptos/ssr", "leptos/tracing", "leptos_meta/ssr", "leptos_router/ssr",
-  "dep:leptos_axum",
+  "dep:leptos_axum", "dep:tokio"
 ]
