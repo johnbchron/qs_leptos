@@ -17,7 +17,6 @@ async fn main() {
             move || shell(leptos_options.clone())
         })
         .fallback(leptos_axum::file_and_error_handler(shell))
-        .layer(tower_http::compression::CompressionLayer::new())
         .with_state(leptos_options);
 
     // run our app with hyper
